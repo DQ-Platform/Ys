@@ -1116,7 +1116,7 @@
             document.getElementById("res-bb-group").innerText = "Uyğun qrup: " + examState.bbGroup;
         }
 
-        // FIREBASE YAZMA Fต่าง
+        // FIREBASE YAZMA FUNKSİYASI
         function saveResult(name, token, correct, wrong, score, bbGroup) {
             let resultData = {
                 name: name,
