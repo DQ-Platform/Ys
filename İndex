@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DQ Platform - Dövlət Qulluğu Sınaq İmtahanı</title>
+    
+    <!-- Firebase SDK (v9 Modulsuz CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -108,26 +113,6 @@
 
         .btn-secondary:hover {
             background-color: #475569;
-        }
-
-        .btn-action {
-            padding: 4px 8px;
-            font-size: 12px;
-            margin: 2px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-block {
-            background-color: #f59e0b;
-            color: white;
-        }
-
-        .btn-unblock {
-            background-color: #10b981;
-            color: white;
         }
 
         #exam-screen {
@@ -450,10 +435,6 @@
             color: #ef4444;
             font-weight: bold;
         }
-
-        .blocked-row {
-            background-color: #fee2e2;
-        }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -564,7 +545,6 @@
                             <th style="padding: 8px; border: 1px solid #cbd5e1;">Yanlış</th>
                             <th style="padding: 8px; border: 1px solid #cbd5e1;">Bal</th>
                             <th style="padding: 8px; border: 1px solid #cbd5e1;">Uyğun Qrup</th>
-                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Əməliyyatlar</th>
                         </tr>
                     </thead>
                     <tbody id="results-table-body"></tbody>
@@ -580,6 +560,20 @@
     </div>
 
     <script>
+        // --- FIREBASE İNİSİALİZASİYASI ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcrLH1XuiFEp8H7GHfJxeYbfsVgqiJI-U",
+            authDomain: "imtahan-sistemi-7d03e.firebaseapp.com",
+            projectId: "imtahan-sistemi-7d03e",
+            storageBucket: "imtahan-sistemi-7d03e.firebasestorage.app",
+            messagingSenderId: "80370864662",
+            appId: "1:80370864662:web:14c2aa47ee368eb3379b37",
+            measurementId: "G-2KD0WQL5PC"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         document.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'x' || e.key === 'u' || e.key === 's' || e.key === 'a')) {
                 e.preventDefault();
@@ -610,7 +604,7 @@
             { id: 11, subject: "Azərbaycan dili", question: "Mürəkkəb xitab işlənən cümləni müəyyən edin.", options: ["Ay dost, hara gedirsən?", "Məhəmmədhəsən, məni eşidirsən?", "Əziz oğlum, xeyir işin mübarək!", "Aynur, Aysel, məni eşidirsiniz?", "Dərya kimi dalğalan, ey bayrağım!"], correct: 2 },
             { id: 12, subject: "Azərbaycan dili", question: "Qəflətən külək başladı, ağacdakı meyvələr yerə dağıldılar.\nCümlədə ədəbi dilin hansı norması (normaları) pozulmuşdur?", options: ["yalnız leksik", "leksik, qrammatik", "yalnız qrammatik", "fonetik, leksik", "fonetik, leksik, qrammatik"], correct: 1 },
             { id: 13, subject: "Azərbaycan dili", question: "Hansı cümlədə zərf feili sifətə aiddir?", options: ["Dərsə gecikən şagirdləri içəri buraxmadılar.", "Nikbin insanlar həyatı daha çox sevərlər.", "İrəli gedəni yarı yolda saxlamaq olmaz.", "Qapını möhkəmcə bağlayıb içəri keçdim.", "Ucadan danışmaq onun adətidir."], correct: 2 },
-            { id: 14, subject: "Azərbaycan dili", question: "Saitlə başlayan hər cür şəkilçi qoşulduqda aşağıda göstərilən hansı sözün kökündəki son sait düşür?", options: ["ömür", "alın", "çiyin", "burun", "oğul"], correct: 0 },
+            { id: 14, subject: "Azərbaycan dili", question: "Saitlə başlayan hər cür şəkilçi qoşulduqda aşağıda gösterilən hansı sözün kökündəki son sait düşür?", options: ["ömür", "alın", "çiyin", "burun", "oğul"], correct: 0 },
             { id: 15, subject: "Azərbaycan dili", question: "Hansı mürəkkəb adın yazılışı düzgündür?", options: ["Orta paleolit dövrü", "Azərbaycan Respublikası Nazirlər Kabineti", "Nəsimi adına Dilçilik institutu", "31 Dekabr – Dünya Azərbaycanlılarının həmrəylik günü", "Şəmkir rayon Təhsil Şöbəsi"], correct: 1 },
 
             // Qanunvericilik (16-55)
@@ -632,7 +626,7 @@
             { id: 31, subject: "Qanunvericilik", question: "“Dövlət qulluğu haqqında” Azərbaycan Respublikasının Qanununa əsasən şəxs dövlət qulluğuna hansı halda qəbul edilə bilməz?", options: ["Barəsində inzibati həbs tətbiq olunması ilə bağlı məhkəmə qərarı olarsa", "Barəsində inzibati cərimənin tətbiq olunması ilə bağlı inzibati tənbeh qərarı qəbul edilmiş olarsa", "Vurulan ziyanın ödənilməsinə dair məhkəmənin qanuni qüvvəyə minmiş qətnaməsi olarsa", "Barəsində tibbi xarakterli məcburi tədbirlərin tətbiqinə dair məhkəmənin qanuni qüvvəyə minmiş qərarı olarsa"], correct: 3 },
             { id: 32, subject: "Qanunvericilik", question: "“Dövlət qulluğu haqqında” Azərbaycan Respublikasının Qanununa əsasən dövlət qulluqçusu barədə doğru bəndləri müəyyən edin.\n1. Dövlət qulluqçusunun şəxsi işinə müvafiq icra hakimiyyəti orqanı tərəfindən müəyyən olunan qaydalarda nəzərdə tutulmuş sənədlər və məlumatlar daxil edilir.\n2. Dövlət qulluqçusunun şəxsi işinin aparılması ilə bağlı tələblərin pozulmasında təqsirli olan şəxslər Azərbaycan Respublikasının İnzibati Xətalar Məcəlləsində nəzərdə tutulmuş qaydada inzibati məsuliyyət daşıyırlar.\n3. Dövlət qulluğunun ayrı-ayrı növlərində andın status xüsusiyyətləri bələdiyyələrin qərarları ilə müəyyən edilir.\n4. Dövlət qulluqçusunun şəxsi işinin aparılması qaydaları Dövlət Qulluğunu İdarəetmə Şurası tərəfindən müəyyən olunur.\n5. Dövlət qulluqçusunun dövlət qulluğu keçdiyi dövr ərzində yalnız bir şəxsi işi tərtib edilir və andın mətni onun şəxsi işində saxlanılır.", options: ["1, 2, 4", "4, 5", "1, 3", "1, 2, 5"], correct: 3 },
             { id: 33, subject: "Qanunvericilik", question: "\"Dövlət qulluğu haqqında\" Azərbaycan Respublikasının Qanununa əsasən dövlət qulluqçusunun əlavə təhsilinə dair yanlış bəndləri müəyyən edin.\n1. Dövlət qulluqçusunun əlavə təhsili sınaq müddətinə qəbul edilmiş dövlət qulluqçularına şamil edilmir.\n2. Dövlət qulluqçusunun əlavə təhsilinin müddəti həmin dövlət orqanının rəhbəri tərəfindən təsdiq edilən qaydalarla tənzimlənir.\n3. Dövlət qulluqçusunun əlavə təhsilinin maliyyə təminatı müvafiq icra hakimiyyəti orqanı tərəfindən təsdiq edilən qaydalarla tənzimlənir.\n4. Azərbaycan Respublikasının Hesablama Palatası aparatında ali hüquq təhsili tələb edən vəzifələrdə qulluq keçən dövlət qulluqçuları mütəmadi olaraq müvafiq icra hakimiyyəti orqanının tədris-elm müəssisəsində peşə hazırlığına və ixtisasının artırılmasına cəlb edilirlər.\n5. Azərbaycan Respublikasının Korrupsiyaya qarşı mübarizə üzrə Komissiyasının Katibliyində ali hüquq təhsili tələb edən vəzifələrdə qulluq keçən dövlət qulluqçuları mütəmadi olaraq müvafiq icra hakimiyyəti orqanının tədris-elm müəssisəsində peşə hazırlığına və ixtisasının artırılmasına cəlb edilirlər.", options: ["2, 3, 5", "2, 3, 4", "1, 4, 5", "1, 2, 4"], correct: 3 },
-            { id: 34, subject: "Qanunvericilik", question: "“Dövlət qulluğu haqqında” Azərbaycan Respublikasının Qanununa əsasən göstərilən bəndlərdən neçəsi yanlışdır?\n• Yardımçı vəzifə tutan dövlət qulluqçularının əmək münasibətləri Azərbaycan Respublikasının Əmək Məcəlləsi ilə tənzimlənir.\n• Azərbaycan Respublikasının xarici ticarət nümayəndəsi vəzifəsinin tutulması müsabiqə və ya müsahibə keçirmək yolu ilə həyata keçirilir.\n• Daimi dövlət qulluğuna qəbul Azərbaycan Respublikasının adından müvafiq dövlət orqanının sənədi ilə təsdiq edilir.\n• Dövlət qulluğunda fəaliyyətin davam etdirilməsi üzrə keçirilən test imtahanının məzmunu Şuranın təklifləri əsasında müvafiq icra hakimiyyəti orqanının müəyyən etdiyi orqan (qurum) tərəfindən müəyyən edilir.", options: ["Üçü", "Biri", "İkisi", "Dördü"], correct: 2 },
+            { id: 34, subject: "Qanunvericilik", question: "“Dövlət qulluğu haqqında” Azərbaycan Respublikasının Qanununa əsasən gösterilən bəndlərdən neçəsi yanlışdır?\n• Yardımçı vəzifə tutan dövlət qulluqçularının əmək münasibətləri Azərbaycan Respublikasının Əmək Məcəlləsi ilə tənzimlənir.\n• Azərbaycan Respublikasının xarici ticarət nümayəndəsi vəzifəsinin tutulması müsabiqə və ya müsahibə keçirmək yolu ilə həyata keçirilir.\n• Daimi dövlət qulluğuna qəbul Azərbaycan Respublikasının adından müvafiq dövlət orqanının sənədi ilə təsdiq edilir.\n• Dövlət qulluğunda fəaliyyətin davam etdirilməsi üzrə keçirilən test imtahanının məzmunu Şuranın təklifləri əsasında müvafiq icra hakimiyyəti orqanının müəyyən etdiyi orqan (qurum) tərəfindən müəyyən edilir.", options: ["Üçü", "Biri", "İkisi", "Dördü"], correct: 2 },
             { id: 35, subject: "Qanunvericilik", question: "\"Dövlət qulluğu haqqında\" Azərbaycan Respublikasının Qanununa görə inzibati vəzifə tutan dövlət qulluqçusu bir il ərzində neçə təqvim günü ödənişli məzuniyyətə çıxır?", options: ["25 təqvim günü", "28 təqvim günü", "30 təqvim günü", "45 təqvim günü"], correct: 2 },
             { id: 36, subject: "Qanunvericilik", question: "Dövlət qulluğuna hansı hallarda xitam verilə bilməz?", options: ["Dövlət qulluqçusunun 4 aya qədər fəaliyyət qabiliyyətsizliyi davam edərsə", "Dövlət qulluqçusuna intizam tənbeh tədbiri tətbiq edildikdə", "Dövlət orqanı ləğv edildikdə", "Dövlət qulluqçusunun öz arzusu ilə"], correct: 0 },
             { id: 37, subject: "Qanunvericilik", question: "\"Dövlət qulluğu haqqında\" Azərbaycan Respublikasının Qanununa əsasən 3-cü kateqoriya dövlət orqanıdır:", options: ["Ağır cinayətlər məhkəməsi", "Naxçıvan Muxtar Respublikası Ali Məhkəməsi", "Bakı Şəhər İcra Hakimiyyəti", "Azərbaycan Respublikası Hərbi Prokurorluğu"], correct: 0 },
@@ -645,7 +639,7 @@
             { id: 44, subject: "Qanunvericilik", question: "”Korrupsiyaya qarşı mübarizə haqqında” Azərbaycan Respublikasının Qanununa əsasən korrupsiya ilə əlaqədar hüquqpozmalara görə vəzifəli şəxslərin məsuliyyəti ilə bağlı doğrudur:", options: ["Vəzifəli şəxs tərəfindən korrupsiya ilə əlaqədar hüquqpozmaların törədilməsi cinayət məsuliyyəti yaratdıqda, vəzifəli şəxsin məsuliyyətə cəlb edilməsi Azərbaycan Respublikasının müvafiq qanunvericiliyinə uyğun həyata keçirilir.", "Azərbaycan Respublikasının Konstitusiyası ilə müəyyən olunmuş qaydada dövlət orqanlarına seçilmiş şəxslər korrupsiya ilə əlaqədar hüquqpozma törətdikdə, korrupsiyaya qarşı mübarizə aparan orqan bu barədə Məhkəmə-Hüquq Şurasına məlumat verir.", "Vəzifəli şəxs tərəfindən korrupsiya ilə əlaqədar hüquqpozmaların törədilməsi cinayət məsuliyyəti yaratmadıqda, qanunla müəyyən edilmiş xüsusi qaydalara riayət edilməklə, qanunvericiliklə müəyyən edilmiş qaydada mülki məsuliyyətə səbəb olur.", "Azərbaycan Respublikasının dövlət orqanlarında seçkili vəzifələrə namizədliyi qanunla müəyyən olunmuş qaydada qeydə alınmış şəxslər korrupsiya ilə əlaqədar hüquqpozmalar törətdikdə, onlar barəsində “Korrupsiyaya qarşı mübarizə haqqında” Azərbaycan Respublikasının Qanununda nəzərdə tutulmuş tədbirlər görülür."], correct: 0 },
             { id: 45, subject: "Qanunvericilik", question: "Korrupsiya hüquqpozması deyil:", options: ["Vəzifəli şəxsin xidməti vəzifəsinin (səlahiyyətlərinin) icrası ilə əlaqədar hər hansı hərəkətin edilməsi və ya belə hərəkətin edilməsindən imtina olunması müqabilində özü və yaxud üçüncü şəxslər üçün birbaşa və ya dolayı yolla maddi və sair nemətlər, imtiyazlar və ya güzəştlər tələb etməsi, əldə etməsi və ya belə maddi və sair nemətlərin, imtiyazların və ya güzəştlərin verilməsi ilə bağlı təklifi və ya vədi qəbul etməsi", "Vəzifəli şəxs tərəfindən xidməti vəzifəsinin (səlahiyyətlərinin) icrası ilə əlaqədar hər hansı hərəkətin edilməsi və ya belə hərəkətin edilməsindən imtina olunması müqabilində qanunsuz olaraq alınmış əmlakdan özü və ya üçüncü şəxslər üçün mənfəət əldə etmək məqsədilə istifadə edilməsi", "Normativ hüquqi aktların və digər qərarların qəbul edilməsi zamanı fiziki və ya hüquqi şəxslərə onların təyinatına uyğun olmayan üstünlüklər vermək", "Müəyyən mükafat müqabilində vəzifəli şəxsin qərarına qanunsuz təsir göstərmək imkanına malik olduğunu bildirən hər hansı şəxsə birbaşa və ya dolayı yolla maddi və sair nemətlərin, imtiyazların və ya güzəştlərin təklif olunması, vəd edilməsi və ya verilməsi"], correct: 2 },
             { id: 46, subject: "Qanunvericilik", question: "Məlumat azadlığının həyata keçirilməsinin əsas prinsiplərindən biri deyil:", options: ["Məlumatın açıqlığı və onun mübadilə edilməsinin azadlığı", "Yalnız vəzifəli şəxslərin ailə və şəxsi həyat sirlərinin saxlanılması", "Məlumatın obyektivliyi, tamlığı və həqiqiliyi", "Məlumatın axtarılmasının, əldə edilməsinin və istifadə olunmasının qanuniliyi"], correct: 1 },
-            { id: 47, subject: "Qanunvericilik", question: "\"Vətəndaşların müraciətləri haqqında\" Azərbaycan Respublikasının Qanununa əsasən vətəndaşların yazılı müraciətlərinin qəbulu, qeydiyyatı və onlara baxılması qaydası ilə bağlı yanlışdır:", options: ["Müraciətdə göstərilən məsələnin həlli ilə əlaqədar əlavə məlumatların öyrənilməsi üçün aidiyyəti üzrə göndərilən sorğuya beş iş günü ərzində cavab verilə bilər.", "Müraciətdə göstərilən məsələyə baxmaq səlahiyyəti bir neçə müraciətə baxan subyektə aiddirsə, müraciətin surəti üç iş günündən gec olmayaraq həmin subyektlərə göndərilir.", "Vətəndaşların müraciətlərini aidiyyəti üzrə baxılmaq üçün nəinki qanunazidd hərəkətindən şikayət edilən müraciətə baxan subyektə, hətta onun vəzifəli şəxslərinə də göndərmək qadağandır.", "Qanunla müəyyən edilmiş hallarda müraciətə müvafiq ərazidə yaşayan əhalinin əksəriyyətinin danışdığı dildə cavab verilə bilər"], correct: 0 },
+            { id: 47, subject: "Qanunvericilik", question: "\"Vətəndaşların müraciətləri haqqında\" Azərbaycan Respublikasının Qanununa əsasən vətəndaşların yazılı müraciətlərinin qəbulu, qeydiyyatı və onlara baxılması qaydası ilə bağlı yanlışdır:", options: ["Müraciətdə gösterilən məsələnin həlli ilə əlaqədar əlavə məlumatların öyrənilməsi üçün aidiyyəti üzrə göndərilən sorğuya beş iş günü ərzində cavab verilə bilər.", "Müraciətdə gösterilən məsələyə baxmaq səlahiyyəti bir neçə müraciətə baxan subyektə aiddirsə, müraciətin surəti üç iş günündən gec olmayaraq həmin subyektlərə göndərilir.", "Vətəndaşların müraciətlərini aidiyyəti üzrə baxılmaq üçün nəinki qanunazidd hərəkətindən şikayət edilən müraciətə baxan subyektə, hətta onun vəzifəli şəxslərinə də göndərmək qadağandır.", "Qanunla müəyyən edilmiş hallarda müraciətə müvafiq ərazidə yaşayan əhalinin əksəriyyətinin danışdığı dildə cavab verilə bilər"], correct: 0 },
             { id: 48, subject: "Qanunvericilik", question: "\"Vətəndaşların müraciətləri haqqında\" Azərbaycan Respublikasının Qanununa əsasən müraciətə baxılma müddəti ən çoxu nə qədər ola bilər?", options: ["50 iş günü", "30 iş günü", "60 iş günü", "40 iş günü"], correct: 2 },
             { id: 49, subject: "Qanunvericilik", question: "Ayşən aptekə dərman almaq üçün daxil olur. Daha sonra aldığı dərmanın üzərində Azərbaycan dilində hər hansı bir məlumatın yazılmadığını görür və buna etiraz edir. Ayşən bu apteki şikayət edəcəyini bildirir. Bu situasiyaya əsasən kim haqlıdır?", options: ["Ayşənin etirazı əsaslıdır. Azərbaycana idxal olunan məhsulların üzərində xarici dillərlə yanaşı Azərbaycan dilində də yazılar olmalıdır.", "Ayşənin etirazı əsassızdır. Azərbaycana idxal olunan məhsulların üzərində Azərbaycan dilində yazılar yazılmaya bilər.", "Ayşənin etirazı əsaslıdır. Azərbaycana idxal olunan məhsulların üzərində yalnız Azərbaycan dilində də yazılar olmalıdır.", "Ayşənin etirazı əsassızdır. Azərbaycana idxal olunan məhsulların üzərində xarici dildə yazı varsa onun şikayət etmək hüququ yoxdur."], correct: 0 },
             { id: 50, subject: "Qanunvericilik", question: "\"Məhkəmələr və hakimlər haqqında\" Azərbaycan Respublikasının Qanununa əsasən düzgün fikirləri seçin.\n\n1. Məhkəmələrin üzərinə qanunda təsbit olunmuş vəzifələrdən başqa vəzifələrin qoyulması yolverilməzdir.\n2. Birinci instansiya məhkəməsində işlərə yalnız təkbaşına baxılır.\n3. Bütün hallarda məhkəmələrin qərarları açıq elan edilir.\n4. Qanunda nəzərdə tutulmuş hallar istisna olmaqla cinayət işlərinin qiyabi məhkəmə icraatına yol verilir.", options: ["1, 3", "2, 3", "1, 4", "3, 4"], correct: 0 },
@@ -767,11 +761,6 @@
             window.location.hash = "";
         }
 
-        function isUserBlocked(name, token) {
-            let blockedUsers = JSON.parse(localStorage.getItem("dq_blocked_users") || "[]");
-            return blockedUsers.some(user => user.name.toLowerCase() === name.toLowerCase() && user.token === token);
-        }
-
         function startExam() {
             const nameInput = document.getElementById("user-name").value.trim();
             const tokenInput = document.getElementById("user-token").value.trim().toUpperCase();
@@ -783,10 +772,6 @@
             }
             if (!validTokens.includes(tokenInput)) {
                 errorMsg.innerText = "Yanlış unikal kod!";
-                return;
-            }
-            if (isUserBlocked(nameInput, tokenInput)) {
-                errorMsg.innerText = "Girişiniz admin tərəfindən bloklanıb!";
                 return;
             }
 
@@ -1131,85 +1116,71 @@
             document.getElementById("res-bb-group").innerText = "Uyğun qrup: " + examState.bbGroup;
         }
 
+        // FIREBASE YAZMA Fต่าง
         function saveResult(name, token, correct, wrong, score, bbGroup) {
-            let results = JSON.parse(localStorage.getItem("dq_exam_results") || "[]");
-            results.push({ name, token, correct, wrong, score, bbGroup, date: new Date().toLocaleString() });
-            localStorage.setItem("dq_exam_results", JSON.stringify(results));
+            let resultData = {
+                name: name,
+                token: token,
+                correct: correct,
+                wrong: wrong,
+                score: score,
+                bbGroup: bbGroup,
+                date: new Date().toLocaleString()
+            };
+
+            // Realtime Database-ə göndərilir
+            database.ref("results").push(resultData);
         }
 
+        // FIREBASE İLƏ ADMİN NƏTİCƏLƏRİNİN CANLI OXUNMASI
         function loadAdminResults() {
-            let results = JSON.parse(localStorage.getItem("dq_exam_results") || "[]");
-            let blockedUsers = JSON.parse(localStorage.getItem("dq_blocked_users") || "[]");
+            database.ref("results").on("value", (snapshot) => {
+                let data = snapshot.val();
+                let results = [];
+                
+                if (data) {
+                    results = Object.values(data);
+                }
 
-            document.getElementById("stat-total-students").innerText = results.length;
+                document.getElementById("stat-total-students").innerText = results.length;
 
-            let maxScore = 0;
-            let totalScoreSum = 0;
+                let maxScore = 0;
+                let totalScoreSum = 0;
 
-            results.forEach(r => {
-                if (r.score > maxScore) maxScore = r.score;
-                totalScoreSum += r.score;
+                results.forEach(r => {
+                    if (r.score > maxScore) maxScore = r.score;
+                    totalScoreSum += r.score;
+                });
+
+                let avgScore = results.length > 0 ? (totalScoreSum / results.length).toFixed(1) : 0;
+                document.getElementById("stat-max-score").innerText = maxScore;
+                document.getElementById("stat-avg-score").innerText = avgScore;
+
+                let tbody = document.getElementById("results-table-body");
+                let html = "";
+                
+                // Nəticələri ən sonuncu yuxarıda olmaqla sıralamaq
+                results.reverse().forEach(r => {
+                    html += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1;">${r.name}</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1;">${r.token}</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1; color: #15803d; font-weight: bold;">${r.correct}</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1; color: #b91c1c; font-weight: bold;">${r.wrong}</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${r.score}</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1;">${r.bbGroup}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
             });
-
-            let avgScore = results.length > 0 ? (totalScoreSum / results.length).toFixed(1) : 0;
-            document.getElementById("stat-max-score").innerText = maxScore;
-            document.getElementById("stat-avg-score").innerText = avgScore;
-
-            let tbody = document.getElementById("results-table-body");
-            let html = "";
-            results.forEach((r, idx) => {
-                let isBlocked = blockedUsers.some(u => u.name.toLowerCase() === r.name.toLowerCase() && u.token === r.token);
-                let rowClass = isBlocked ? 'class="blocked-row"' : '';
-                let blockBtnText = isBlocked ? 'Blokdan çıxar' : 'Blokla';
-                let blockBtnClass = isBlocked ? 'btn-unblock' : 'btn-block';
-
-                html += `
-                    <tr ${rowClass}>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1;">${r.name} ${isBlocked ? '<b style="color:red;">(Bloklu)</b>' : ''}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1;">${r.token}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #15803d; font-weight: bold;">${r.correct}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #b91c1c; font-weight: bold;">${r.wrong}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${r.score}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1;">${r.bbGroup}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1;">
-                            <button class="btn-action ${blockBtnClass}" onclick="toggleBlockUser('${r.name}', '${r.token}')">${blockBtnText}</button>
-                            <button class="btn-action btn-danger" onclick="deleteUserResult(${idx})">Sil</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function toggleBlockUser(name, token) {
-            let blockedUsers = JSON.parse(localStorage.getItem("dq_blocked_users") || "[]");
-            let index = blockedUsers.findIndex(u => u.name.toLowerCase() === name.toLowerCase() && u.token === token);
-
-            if (index !== -1) {
-                blockedUsers.splice(index, 1);
-                alert(`${name} blokdan çıxarıldı.`);
-            } else {
-                blockedUsers.push({ name, token });
-                alert(`${name} bloklandı.`);
-            }
-
-            localStorage.setItem("dq_blocked_users", JSON.stringify(blockedUsers));
-            loadAdminResults();
-        }
-
-        function deleteUserResult(index) {
-            if (confirm("Bu iştirakçının nəticəsini silmək istədiyinizə əminsinizmi?")) {
-                let results = JSON.parse(localStorage.getItem("dq_exam_results") || "[]");
-                results.splice(index, 1);
-                localStorage.setItem("dq_exam_results", JSON.stringify(results));
-                loadAdminResults();
-            }
         }
 
         function clearResults() {
-            if (confirm("Bütün nəticələri silmək istədiyinizə əminsinizmi?")) {
-                localStorage.removeItem("dq_exam_results");
-                loadAdminResults();
+            if (confirm("Bütün nəticələri Firebase-dən silmək istədiyinizə əminsinizmi?")) {
+                database.ref("results").remove().then(() => {
+                    alert("Bütün nəticələr təmizləndi.");
+                });
             }
         }
     </script>
