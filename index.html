@@ -3,651 +3,767 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DİM Üslublu Onlayn İmtahan Sistemi</title>
-    
-    <!-- Supabase JavaScript SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <title>DİM Dövlət Qulluğu İmtahan Sistemi</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f8fafc; color: #1e293b; line-height: 1.5; -webkit-user-select: none; user-select: none; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-        .card { background: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 25px; margin-bottom: 20px; }
-        
-        /* Ekranlar */
-        #login-screen, #exam-screen, #result-screen, #admin-panel { display: none; }
-        
-        /* Giriş Paneli */
-        .login-box { max-width: 400px; margin: 80px auto; text-align: center; }
-        .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
-        .btn { background: #2563eb; color: #fff; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
-        .btn:hover { background: #1d4ed8; }
-        .error-msg { color: #ef4444; margin-top: 10px; font-size: 14px; }
-        
-        /* Header və Taymer */
-        .exam-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
-        .timer-box { font-size: 20px; font-weight: bold; color: #dc2626; background: #fef2f2; padding: 8px 16px; border-radius: 6px; border: 1px solid #fca5a5; }
-        
-        /* Əsas Şəbəkə */
-        .exam-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
-        
-        /* Naviqasiya Paneli */
-        .grid-nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
-        .nav-box { width: 100%; height: 38px; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border-radius: 4px; background: #fff; font-size: 13px; }
-        .nav-box.answered { background: #22c55e; color: #fff; border-color: #16a34a; }
-        .nav-box.flagged { background: #eab308; color: #fff; border-color: #ca8a04; }
-        .nav-box.current { border: 2px solid #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
-        .collapsed { display: none; }
-        
-        /* Sual Bölməsi */
-        .question-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .question-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; white-space: pre-line; }
-        .question-img { max-width: 100%; height: auto; margin: 15px 0; border-radius: 6px; border: 1px solid #e2e8f0; }
-        .options label { display: block; padding: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
-        .options label:hover { background: #f1f5f9; }
-        .options input { margin-right: 10px; }
-        .clear-option-btn { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px; }
-        
-        /* Düymələr */
-        .nav-btns { display: flex; justify-content: space-between; margin-top: 20px; }
-        .btn-secondary { background: #64748b; color: white; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; }
-        .btn-finish { background: #dc2626; color: white; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
-        
-        /* DİM Protokolu (Nəticə) */
-        .dim-report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
-        .dim-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-        .dim-table th, .dim-table td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: center; }
-        .dim-table th { background: #f1f5f9; }
-        .ans-correct { background-color: #dcfce7; color: #15803d; font-weight: bold; }
-        .ans-wrong { background-color: #fee2e2; color: #b91c1c; font-weight: bold; }
-        
-        /* Admin Cədvəli */
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .admin-table th, .admin-table td { padding: 10px; border: 1px solid #cbd5e1; text-align: left; }
-        .admin-table th { background: #f8fafc; }
-        .stat-card { background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 6px; margin-bottom: 10px; }
+        :root {
+            --accent-gold: #d97706;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --border-color: #334155;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #475569; }
+        .btn-secondary:hover { background-color: #334155; }
+        .btn-danger { background-color: #dc2626; }
+        .btn-danger:hover { background-color: #b91c1c; }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #0f172a;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        /* Top Nav & Timer */
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .timer-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ef4444;
+            background: #0f172a;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #ef4444;
+        }
+
+        /* Question Elements */
+        .question-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .question-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options label {
+            display: block;
+            background: #0f172a;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            transition: 0.2s;
+        }
+
+        .options label:hover {
+            border-color: var(--accent-gold);
+        }
+
+        .clear-option-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        /* Question Navigation Grid */
+        .grid-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+            gap: 6px;
+            margin-top: 15px;
+        }
+
+        .nav-box {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .nav-box.answered { background: #2563eb; color: white; }
+        .nav-box.flagged { border: 2px solid #f59e0b; position: relative; }
+        .nav-box.flagged::after { content: '📌'; font-size: 8px; position: absolute; top: 0; right: 1px; }
+        .nav-box.current { ring: 2px solid #38bdf8; outline: 2px solid #38bdf8; }
+
+        /* Report Table */
+        .dim-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background: #0f172a;
+        }
+
+        .dim-table th, .dim-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .ans-correct { background-color: #065f46; color: #d1fae5; }
+        .ans-wrong { background-color: #991b1b; color: #fee2e2; }
+
+        .stat-card {
+            display: inline-block;
+            background: #0f172a;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-right: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-val { font-size: 22px; font-weight: bold; color: var(--accent-gold); }
     </style>
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <!-- LOGIN SCREEN -->
+        <div id="login-screen" class="card" style="max-width: 400px; margin: 80px auto;">
+            <h2 style="text-align: center; color: var(--accent-gold);">DİM İmtahan Portalı</h2>
+            <div style="margin-bottom: 15px;">
+                <label>Ad və Soyad:</label>
+                <input type="text" id="student-name" placeholder="Məs: Əli Əliyev">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>İmtahan Tokeni:</label>
+                <input type="text" id="student-token" placeholder="Tokeni daxil edin">
+            </div>
+            <button class="btn" style="width: 100%;" onclick="startExam()">İmtahana Başla</button>
+        </div>
 
-    <!-- 1. GİRİŞ EKRANI -->
-    <div id="login-screen" class="card login-box" style="display: block;">
-        <h2>İmtahana Giriş</h2>
-        <br>
-        <input type="text" id="user-name" placeholder="Ad və Soyad" autocomplete="off">
-        <input type="text" id="user-token" placeholder="Unikal Kod (Məs: P7GS57)" autocomplete="off">
-        <button class="btn" onclick="startExam()">İmtahana Başla</button>
-        <div id="error-msg" class="error-msg"></div>
-    </div>
-
-    <!-- 2. İMTAHAN EKRANI -->
-    <div id="exam-screen">
-        <div class="card">
-            <div class="exam-header">
+        <!-- EXAM SCREEN -->
+        <div id="exam-screen" style="display: none;">
+            <div class="card exam-header">
                 <div>
-                    <h3 id="student-display-name">Tələbə</h3>
-                    <span style="font-size: 12px; color: #64748b;">DİM Onlayn Sınaq İnterfeysi</span>
+                    <h3 id="display-student-name" style="margin: 0; color: var(--accent-gold);"></h3>
+                    <span style="font-size: 12px; color: #94a3b8;">BB Qrupu üzrə Dövlət Qulluğu İmtahanı</span>
                 </div>
-                <div class="timer-box" id="timer">03:00:00</div>
+                <div class="timer-box" id="timer">02:30:00</div>
             </div>
 
-            <div class="exam-layout">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <strong>Suallar</strong>
-                        <button id="toggle-btn" onclick="toggleSidebar()" style="border:none; background:none; color:#2563eb; cursor:pointer; font-size:12px;">Yığ [-]</button>
-                    </div>
-                    <div id="grid-nav-container" class="grid-nav"></div>
+            <div style="display: grid; grid-template-columns: 1fr 280px; gap: 20px;">
+                <div class="card" id="question-container">
+                    <!-- Sual dinamik yüklənəcək -->
                 </div>
 
                 <div>
-                    <div id="single-question-container"></div>
-                    <div class="nav-btns">
-                        <button class="btn-secondary" onclick="prevQuestion()">Əvvəlki</button>
-                        <button class="btn-secondary" onclick="nextQuestion()">Növbəti</button>
-                        <button class="btn-finish" onclick="confirmFinish()">İmtahanı Bitir</button>
+                    <div class="card">
+                        <h4 style="margin-top: 0;">Suallar</h4>
+                        <div class="grid-nav" id="grid-nav-container"></div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" style="flex: 1;" onclick="prevQuestion()">Əvvəlki</button>
+                            <button class="btn btn-secondary" style="flex: 1;" onclick="nextQuestion()">Növbəti</button>
+                        </div>
+                        <button class="btn btn-danger" style="width: 100%; margin-top: 15px;" onclick="confirmFinish()">İmtahanı Bitir</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- RESULT SCREEN -->
+        <div id="result-screen" class="card" style="display: none;">
+            <h2 style="color: var(--accent-gold); text-align: center;">İmtahan Nəticəsi</h2>
+            <p style="text-align: center; font-size: 18px;" id="res-name"></p>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <div class="stat-card">
+                    <div>Doğru</div>
+                    <div class="stat-val" style="color: #10b981;" id="res-total-correct">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>Yanlış</div>
+                    <div class="stat-val" style="color: #ef4444;" id="res-total-wrong">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>Cavabsız</div>
+                    <div class="stat-val" style="color: #94a3b8;" id="res-total-blank">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>Yekun Bal</div>
+                    <div class="stat-val" id="res-total-score">0</div>
+                </div>
+            </div>
+
+            <h3 id="res-bb-group" style="text-align: center; color: var(--accent-gold);"></h3>
+            <hr style="border-color: var(--border-color); margin: 20px 0;">
+
+            <h3>DİM Cavab Protokolu</h3>
+            <div id="dim-report-content"></div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="reviewExam()">Suallara Yenidən Bax</button>
+            </div>
+        </div>
+
+        <!-- ADMIN PANEL SCREEN -->
+        <div id="admin-screen" class="card" style="display: none;">
+            <h2>Admin Panel - İştirakçı Nəticələri</h2>
+            <div style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div>Tələbə Sayı</div>
+                    <div class="stat-val" id="stat-total-students">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>Maksimum Bal</div>
+                    <div class="stat-val" id="stat-max-score">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>Ortalama Bal</div>
+                    <div class="stat-val" id="stat-avg-score">0</div>
+                </div>
+            </div>
+
+            <button class="btn btn-danger" style="margin-bottom: 15px;" onclick="clearResults()">Bütün Nəticələri Sil</button>
+
+            <table style="width: 100%; border-collapse: collapse; background: #0f172a;" id="admin-results-table">
+                <thead>
+                    <tr style="background: #1e293b; text-align: left;">
+                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Ad Soyad</th>
+                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Token</th>
+                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Doğru</th>
+                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Yanlış</th>
+                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Bal</th>
+                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Kateqoriya</th>
+                    </tr>
+                </thead>
+                <tbody id="results-table-body"></tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- 3. NƏTİCƏ EKRANI (DİM Protokolu) -->
-    <div id="result-screen" class="card">
-        <h2>İmtahan Nəticəsi - DİM Protokolu</h2>
-        <p style="margin-top: 5px; color: #475569;">İştirakçı: <strong id="res-name">-</strong></p>
-        
-        <div style="display: flex; gap: 20px; margin: 15px 0; font-size: 14px;">
-            <div>Doğru: <strong id="res-total-correct" style="color: green;">0</strong></div>
-            <div>Səhv: <strong id="res-total-wrong" style="color: red;">0</strong></div>
-            <div>Boş: <strong id="res-total-blank">0</strong></div>
-            <div>Yekun Bal: <strong id="res-total-score" style="color: #2563eb; font-size: 16px;">0</strong></div>
-        </div>
+    <script>
+        // --- Firebase Config (Öz parametrlərinizlə əvəz edin) ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-        <div style="font-weight: bold; padding: 10px; background: #f1f5f9; border-radius: 6px;" id="res-bb-group">-</div>
-
-        <div id="dim-report-content" class="dim-report-grid"></div>
-
-        <div style="margin-top: 20px;">
-            <button class="btn-secondary" onclick="backToReviewQuestions()">Suallara və Cavablara Bax</button>
-        </div>
-    </div>
-
-    <!-- 4. ADMİN PANELİ -->
-    <div id="admin-panel" class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>Admin İdarəetmə Paneli</h2>
-            <button class="btn-secondary" onclick="closeAdminPanel()">Çıxış</button>
-        </div>
-
-        <div style="display: flex; gap: 15px;">
-            <div class="stat-card" style="flex:1;">İştirakçı Sayı: <strong id="stat-total-students">0</strong></div>
-            <div class="stat-card" style="flex:1;">Ən Yüksək Bal: <strong id="stat-max-score">0</strong></div>
-            <div class="stat-card" style="flex:1;">Orta Bal: <strong id="stat-avg-score">0</strong></div>
-        </div>
-
-        <div style="margin: 15px 0; text-align: right;">
-            <button style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;" onclick="clearResults()">Bütün Nəticələri Sil</button>
-        </div>
-
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Ad Soyad</th>
-                    <th>Kod</th>
-                    <th>D</th>
-                    <th>S</th>
-                    <th>Bal</th>
-                    <th>Təyin Edilən Qrup</th>
-                </tr>
-            </thead>
-            <tbody id="results-table-body">
-                <tr><td colspan="6">Məlumatlar yüklənir...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-</div>
-
-<script>
-// --- SUPABASE İNİSİALİZASİYASI ---
-const SUPABASE_URL = "https://1clDyHhxAiSCurwGHwMi3g.supabase.co";
-const SUPABASE_KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
-
-// Supabase istemcisi
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Təhlükəsizlik tənzimləmələri
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'x' || e.key === 'u' || e.key === 's' || e.key === 'a')) {
-        e.preventDefault();
-        alert("Bu əməliyyat məxfilik məqsədilə qadağandır!");
-    }
-    if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('');
-        alert("Ekran görüntüsü çəkmək qadağandır!");
-    }
-});
-
-const validTokens = ["P7GS57", "K9X2M4", "B3R8L9", "H2V5N1", "H7V7N", "T6Z4Q8", "H27V5N1", "T67Z4Q8"];
-const ADMIN_PASS = "6675157";
-const testDuration = 3 * 3600;
-
-// Nümunə Suallar Siyahısı (Öz suallarınızı buraya əlavə edə bilərsiniz)
-const allQuestions = [
-    { id: 1, subject: "Azərbaycan dili", question: "Hansı sözdə vurğu birinci hecaya düşür?", options: ["Lakin", "Böyük", "Yaxşı", "Sarı"], correct: 0 },
-    { id: 2, subject: "Azərbaycan dili", question: "Sinonim sözlər cütlüyünü seçin:", options: ["Ağ - Qara", "Gözəl - Qəşəng", "Uzun - Qısa", "Böyük - Kiçik"], correct: 1 },
-    { id: 3, subject: "Qanunvericilik", question: "Azərbaycan Respublikasının Konstitusiyası nə vaxt qəbul edilmişdir?", options: ["12 noyabr 1995", "18 oktyabr 1991", "28 may 1918", "31 dekabr 1989"], correct: 0 },
-    { id: 4, subject: "İnformatika", question: "Aşağıdakılardan hansı daxiletmə qurğusudur?", options: ["Monitor", "Printer", "Klaviatura", "Səs ucaldan"], correct: 2 },
-    { id: 5, subject: "Məntiq", question: "Ardıcıllıqdakı növbəti ədədi tapın: 2, 4, 8, 16, ?", options: ["20", "24", "32", "64"], correct: 2 }
-];
-
-let currentStudentName = "";
-let currentActiveToken = "";
-let userAnswers = {};
-let flaggedQuestions = {};
-let currentQuestionIndex = 0;
-let timerInterval;
-let timeLeft = testDuration;
-let examFinished = false;
-
-window.addEventListener('load', function() {
-    if (window.location.hash === "#admin") {
-        openAdminLogin();
-        return;
-    }
-
-    let savedSession = sessionStorage.getItem("active_exam_session");
-    if (savedSession) {
-        let sessionData = JSON.parse(savedSession);
-        currentStudentName = sessionData.name;
-        currentActiveToken = sessionData.token;
-        userAnswers = sessionData.answers || {};
-        flaggedQuestions = sessionData.flags || {};
-        currentQuestionIndex = sessionData.qIndex || 0;
-        timeLeft = sessionData.timeLeft !== undefined ? sessionData.timeLeft : testDuration;
-
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("exam-screen").style.display = "block";
-        document.getElementById("student-display-name").innerText = currentStudentName;
-
-        loadNavGrid();
-        Object.keys(userAnswers).forEach(qId => {
-            let box = document.getElementById(`nav_${qId}`);
-            if (box) box.classList.add("answered");
-        });
-        Object.keys(flaggedQuestions).forEach(qId => {
-            let box = document.getElementById(`nav_${qId}`);
-            if (box) box.classList.add("flagged");
-        });
-
-        renderCurrentQuestion();
-        startTimer(timeLeft);
-    }
-});
-
-function openAdminLogin() {
-    let pass = prompt("Admin şifrəsini daxil edin:");
-    if (pass === ADMIN_PASS) {
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("exam-screen").style.display = "none";
-        document.getElementById("result-screen").style.display = "none";
-        document.getElementById("admin-panel").style.display = "block";
-        loadAdminResults();
-    } else if (pass !== null) {
-        alert("Yanlış şifrə!");
-    }
-}
-
-function closeAdminPanel() {
-    document.getElementById("admin-panel").style.display = "none";
-    document.getElementById("login-screen").style.display = "block";
-    window.location.hash = "";
-}
-
-function startExam() {
-    const nameInput = document.getElementById("user-name").value.trim();
-    const tokenInput = document.getElementById("user-token").value.trim().toUpperCase();
-    const errorMsg = document.getElementById("error-msg");
-
-    if (nameInput === "") {
-        errorMsg.innerText = "Ad və soyadınızı daxil edin!";
-        return;
-    }
-    if (!validTokens.includes(tokenInput)) {
-        errorMsg.innerText = "Yanlış unikal kod!";
-        return;
-    }
-
-    currentStudentName = nameInput;
-    currentActiveToken = tokenInput;
-    userAnswers = {};
-    flaggedQuestions = {};
-    currentQuestionIndex = 0;
-    timeLeft = testDuration;
-    examFinished = false;
-
-    document.getElementById("student-display-name").innerText = currentStudentName;
-    saveSessionState();
-
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("exam-screen").style.display = "block";
-
-    loadNavGrid();
-    renderCurrentQuestion();
-    startTimer(timeLeft);
-}
-
-function saveSessionState() {
-    if (examFinished) return;
-    let sessionData = {
-        name: currentStudentName,
-        token: currentActiveToken,
-        answers: userAnswers,
-        flags: flaggedQuestions,
-        qIndex: currentQuestionIndex,
-        timeLeft: timeLeft
-    };
-    sessionStorage.setItem("active_exam_session", JSON.stringify(sessionData));
-}
-
-function toggleSidebar() {
-    const grid = document.getElementById("grid-nav-container");
-    const btn = document.getElementById("toggle-btn");
-    if (grid.classList.contains("collapsed")) {
-        grid.classList.remove("collapsed");
-        btn.innerText = "Yığ [-]";
-    } else {
-        grid.classList.add("collapsed");
-        btn.innerText = "Aç [+]";
-    }
-}
-
-function backToReviewQuestions() {
-    document.getElementById("result-screen").style.display = "none";
-    document.getElementById("exam-screen").style.display = "block";
-    currentQuestionIndex = 0;
-    renderCurrentQuestion();
-}
-
-function loadNavGrid() {
-    const gridContainer = document.getElementById("grid-nav-container");
-    gridContainer.innerHTML = "";
-
-    allQuestions.forEach((q, idx) => {
-        let box = document.createElement("div");
-        box.className = "nav-box";
-        box.id = `nav_${q.id}`;
-        box.innerText = q.id;
-
-        if (userAnswers[q.id] !== undefined) box.classList.add("answered");
-        if (flaggedQuestions[q.id]) box.classList.add("flagged");
-        if (idx === currentQuestionIndex) box.classList.add("current");
-
-        box.onclick = () => jumpToQuestion(idx);
-        gridContainer.appendChild(box);
-    });
-}
-
-function renderCurrentQuestion() {
-    const q = allQuestions[currentQuestionIndex];
-    const container = document.getElementById("single-question-container");
-    const isFlagged = flaggedQuestions[q.id] ? "checked" : "";
-    const userAns = userAnswers[q.id];
-
-    let letters = ["A", "B", "C", "D", "E"];
-    let imgHtml = q.image ? `<img src="${q.image}" alt="Sual ${q.id} şəkli" class="question-img">` : "";
-
-    let optionsHtml = q.options.map((opt, i) => {
-        let checked = userAns === i ? "checked" : "";
-        let disabled = examFinished ? "disabled" : "";
-        return `
-            <label>
-                <input type="radio" name="option_${q.id}" value="${i}" ${checked} ${disabled} onchange="selectOption(${q.id}, ${i})">
-                <strong>${letters[i]})</strong> ${opt}
-            </label>
-        `;
-    }).join("");
-
-    let clearBtnHtml = (!examFinished && userAns !== undefined) 
-        ? `<button class="clear-option-btn" onclick="clearOption(${q.id})">Cavabı Təmizlə</button>` 
-        : "";
-
-    container.innerHTML = `
-        <div class="question-top">
-            <span style="font-size: 13px; color: #64748b; font-weight: bold;">Sual ${q.id} / ${allQuestions.length} (${q.subject})</span>
-            <label class="flag-label" style="cursor:pointer; font-size:13px;">
-                <input type="checkbox" onchange="toggleFlag(${q.id})" ${isFlagged} ${examFinished ? 'disabled' : ''}>
-                🚩 Nişanla
-            </label>
-        </div>
-        <div class="question-title">${q.question}</div>
-        ${imgHtml}
-        <div class="options">${optionsHtml}</div>
-        ${clearBtnHtml}
-    `;
-
-    document.querySelectorAll(".nav-box").forEach(el => el.classList.remove("current"));
-    let curNav = document.getElementById(`nav_${q.id}`);
-    if (curNav) curNav.classList.add("current");
-
-    saveSessionState();
-}
-
-function selectOption(qId, optIdx) {
-    if (examFinished) return;
-    userAnswers[qId] = optIdx;
-    let navBox = document.getElementById(`nav_${qId}`);
-    if (navBox) navBox.classList.add("answered");
-    renderCurrentQuestion();
-}
-
-function clearOption(qId) {
-    if (examFinished) return;
-    delete userAnswers[qId];
-    let navBox = document.getElementById(`nav_${qId}`);
-    if (navBox) navBox.classList.remove("answered");
-    renderCurrentQuestion();
-}
-
-function toggleFlag(qId) {
-    if (flaggedQuestions[qId]) {
-        delete flaggedQuestions[qId];
-    } else {
-        flaggedQuestions[qId] = true;
-    }
-    let navBox = document.getElementById(`nav_${qId}`);
-    if (navBox) navBox.classList.toggle("flagged");
-    saveSessionState();
-}
-
-function prevQuestion() {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        renderCurrentQuestion();
-    }
-}
-
-function nextQuestion() {
-    if (currentQuestionIndex < allQuestions.length - 1) {
-        currentQuestionIndex++;
-        renderCurrentQuestion();
-    }
-}
-
-function jumpToQuestion(index) {
-    currentQuestionIndex = index;
-    renderCurrentQuestion();
-}
-
-function startTimer(duration) {
-    clearInterval(timerInterval);
-    timeLeft = duration;
-
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        let h = Math.floor(timeLeft / 3600);
-        let m = Math.floor((timeLeft % 3600) / 60);
-        let s = timeLeft % 60;
-
-        document.getElementById("timer").innerText = 
-            `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-
-        if (timeLeft % 5 === 0) saveSessionState();
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert("Vaxt bitdi! Cavablarınız təsdiqlənir.");
-            finishExam();
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
-    }, 1000);
-}
+        const database = firebase.database();
 
-function confirmFinish() {
-    if (confirm("İmtahanı bitirmək istədiyinizdən əminsiniz?")) {
-        finishExam();
-    }
-}
+        // --- Qlobal Dəyişənlər ---
+        let currentStudentName = "";
+        let currentActiveToken = "";
+        let currentQuestionIndex = 0;
+        let timerInterval = null;
+        let timeLeft = 9000; // 2 saat 30 dəqiqə (saniyə ilə)
+        let userAnswers = {};
+        let flaggedQuestions = {};
+        let examFinished = false;
 
-// İmtahanı Yekunlaşdırmaq və Supabase-ə Yazmaq
-async function finishExam() {
-    examFinished = true;
-    clearInterval(timerInterval);
-    sessionStorage.removeItem("active_exam_session");
+        // Örnək sual bazası (100 sual strukturunda nümunə)
+        const allQuestions = [
+            { id: 1, subject: "Azərbaycan dili", question: "Hansı sözdə ahəng qanunu pozulmuşdur?", options: ["Kitab", "Bulaq", "Xiyar", "Qələm", "Ağac"], correct: 0 },
+            { id: 2, subject: "Azərbaycan dili", question: "İsim köklü sözü müəyyən edin:", options: ["Yazıçı", "Gözəl", "Böyük", "Qırmızı", "Sürətli"], correct: 0 },
+            { id: 3, subject: "Qanunvericilik", question: "Azərbaycan Respublikasında dövlət hakimiyyətinin yeganə mənbəyi kimdir?", options: ["Prezident", "Milli Məclis", "Azərbaycan xalqı", "Məhkəmələr", "Konstitusiya Məhkəməsi"], correct: 2 },
+            { id: 4, subject: "İnformatika", question: "Aşağıdakılardan hansı əsas giriş qurğusudur?", options: ["Monitor", "Klaviatura", "Printer", "Səsucaldıcı", "Proyektor"], correct: 1 },
+            { id: 5, subject: "Məntiq", question: "2, 4, 8, 16, ? ardıcıllığını tamamlayın.", options: ["20", "24", "28", "32", "36"], correct: 3 }
+        ];
 
-    document.getElementById("exam-screen").style.display = "none";
-    document.getElementById("result-screen").style.display = "block";
-    document.getElementById("res-name").innerText = currentStudentName;
+        // --- İmtahana Başlama / Bərpa ---
+        function startExam() {
+            const name = document.getElementById("student-name").value.trim();
+            const token = document.getElementById("student-token").value.trim();
 
-    let subjects = ["Azərbaycan dili", "Qanunvericilik", "İnformatika", "Məntiq"];
-    let stats = {
-        totalCorrect: 0,
-        totalWrong: 0,
-        totalBlank: 0,
-        score: 0
-    };
-
-    let reportHtml = "";
-    let letters = ["A", "B", "C", "D", "E"];
-
-    subjects.forEach(subj => {
-        let subjQuestions = allQuestions.filter(q => q.subject === subj);
-        if(subjQuestions.length === 0) return;
-
-        let tableRows = "";
-        let subjCorrect = 0, subjWrong = 0, subjBlank = 0;
-
-        subjQuestions.forEach(q => {
-            let uAns = userAnswers[q.id];
-            let userAnsChar = uAns !== undefined ? letters[uAns] : "-";
-            let correctChar = letters[q.correct];
-            let statusClass = "";
-
-            if (uAns === undefined) {
-                subjBlank++;
-                stats.totalBlank++;
-                statusClass = "";
-            } else if (uAns === q.correct) {
-                subjCorrect++;
-                stats.totalCorrect++;
-                stats.score++;
-                statusClass = "ans-correct";
-            } else {
-                subjWrong++;
-                stats.totalWrong++;
-                statusClass = "ans-wrong";
+            if (token === "admin") {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("admin-screen").style.display = "block";
+                loadAdminResults();
+                return;
             }
 
-            tableRows += `
-                <tr>
-                    <td>${q.id}</td>
-                    <td class="${statusClass}">${userAnsChar}</td>
-                    <td>${correctChar}</td>
-                </tr>
+            if (!name || !token) {
+                alert("Zəhmət olmasa Ad Soyad və Token daxil edin.");
+                return;
+            }
+
+            currentStudentName = name;
+            currentActiveToken = token;
+
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("exam-screen").style.display = "block";
+            document.getElementById("display-student-name").innerText = currentStudentName;
+
+            loadNavGrid();
+            renderCurrentQuestion();
+            startTimer(timeLeft);
+        }
+
+        function saveSessionState() {
+            if (examFinished) return;
+            const state = {
+                studentName: currentStudentName,
+                token: currentActiveToken,
+                userAnswers: userAnswers,
+                flaggedQuestions: flaggedQuestions,
+                currentQuestionIndex: currentQuestionIndex,
+                timeLeft: timeLeft
+            };
+            sessionStorage.setItem("active_exam_session", JSON.stringify(state));
+        }
+
+        function renderCurrentQuestion() {
+            const container = document.getElementById("question-container");
+            const q = allQuestions[currentQuestionIndex];
+            const letters = ["A", "B", "C", "D", "E"];
+            const userAns = userAnswers[q.id];
+            const isFlagged = flaggedQuestions[q.id] ? "checked" : "";
+            const imgHtml = q.image ? `<img src="${q.image}" style="max-width: 100%; margin-bottom: 15px; border-radius: 6px;">` : "";
+
+            let flagElementHtml = examFinished ? "" : `
+                <label class="flag-label" style="cursor: pointer; font-size: 14px;">
+                    <input type="checkbox" id="flag_check" ${isFlagged} onchange="toggleFlagCurrentQuestion(${q.id})"> 📌 Nişanla
+                </label>
             `;
-        });
 
-        reportHtml += `
-            <div class="subject-section">
-                <div style="font-weight: bold; margin-bottom: 5px;">${subj}</div>
-                <table class="dim-table">
-                    <thead>
-                        <tr>
-                            <th>N</th>
-                            <th>Sizin cavab</th>
-                            <th>Doğru cavab</th>
-                        </tr>
-                    </thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-            </div>
-        `;
-    });
+            let reviewBadgeHtml = "";
+            if (examFinished) {
+                if (userAns === undefined) {
+                    reviewBadgeHtml = `<span style="background-color: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 13px;">Cavabsız</span>`;
+                } else if (userAns === q.correct) {
+                    reviewBadgeHtml = `<span style="background-color: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 13px;">✓ Doğru Cavab</span>`;
+                } else {
+                    reviewBadgeHtml = `<span style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 13px;">✗ Yanlış Cavab</span>`;
+                }
+            }
 
-    document.getElementById("dim-report-content").innerHTML = reportHtml;
-    document.getElementById("res-total-correct").innerText = stats.totalCorrect;
-    document.getElementById("res-total-wrong").innerText = stats.totalWrong;
-    document.getElementById("res-total-blank").innerText = stats.totalBlank;
-    document.getElementById("res-total-score").innerText = stats.score;
+            let optionsHtml = q.options.map((opt, idx) => {
+                let isChecked = userAns === idx ? "checked" : "";
+                let style = "";
+                
+                if (examFinished) {
+                    if (idx === q.correct) {
+                        style = "background-color: #d1fae5; border: 1px solid #10b981; color: #065f46; font-weight: bold;";
+                    } else if (userAns === idx && userAns !== q.correct) {
+                        style = "background-color: #fee2e2; border: 1px solid #ef4444; color: #991b1b;";
+                    }
+                }
 
-    let groupText = "";
-    if (stats.score >= 80) groupText = "Uyğun Qrup: BB1 (Yüksək İnzibati)";
-    else if (stats.score >= 70) groupText = "Uyğun Qrup: BB2";
-    else if (stats.score >= 60) groupText = "Uyğun Qrup: BB3";
-    else if (stats.score >= 50) groupText = "Uyğun Qrup: BB4 (Mövqe Tələbini Ödəyir)";
-    else groupText = "Müvafiq Keçid Balı Toplanmamışdır";
+                let disabledAttr = examFinished ? "disabled" : "";
 
-    document.getElementById("res-bb-group").innerText = groupText;
+                return `
+                    <label style="${style}">
+                        <input type="radio" name="opt_${q.id}" value="${idx}" ${isChecked} ${disabledAttr} onchange="selectOption(${q.id}, ${idx})">
+                        <b>${letters[idx]})</b> ${opt}
+                    </label>
+                `;
+            }).join("");
 
-    // Nəticənin Supabase "results" cədvəlinə əlavə edilməsi
-    const { data, error } = await supabase
-        .from('results')
-        .insert([
-            {
+            let clearBtnHtml = (!examFinished && userAns !== undefined) ? `
+                <button class="clear-option-btn" onclick="clearOption(${q.id})">Seçimi təmizlə</button>
+            ` : "";
+
+            let backToReportBtn = examFinished ? `
+                <div style="margin-top: 15px; text-align: center;">
+                    <button class="btn btn-secondary" style="font-size: 13px; padding: 8px 15px;" onclick="showResultScreenFromReview()">📋 Protokola Qayıt</button>
+                </div>
+            ` : "";
+
+            container.innerHTML = `
+                <div>
+                    <div class="question-top">
+                        <span style="font-size: 14px; font-weight: bold; color: var(--accent-gold);">Sual ${currentQuestionIndex + 1} / ${allQuestions.length} (${q.subject})</span>
+                        ${flagElementHtml}
+                        ${reviewBadgeHtml}
+                    </div>
+                    <div class="question-title">${q.question}</div>
+                    ${imgHtml}
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                    ${clearBtnHtml}
+                </div>
+                ${backToReportBtn}
+            `;
+
+            highlightCurrentNavBox();
+        }
+
+        function reviewExam() {
+            document.getElementById("result-screen").style.display = "none";
+            document.getElementById("exam-screen").style.display = "block";
+            currentQuestionIndex = 0;
+            renderCurrentQuestion();
+        }
+
+        function showResultScreenFromReview() {
+            document.getElementById("exam-screen").style.display = "none";
+            document.getElementById("result-screen").style.display = "block";
+        }
+
+        function selectOption(qId, optionIdx) {
+            if (examFinished) return;
+            userAnswers[qId] = optionIdx;
+            
+            const box = document.getElementById(`nav_${qId}`);
+            if (box) box.classList.add("answered");
+            
+            saveSessionState();
+            renderCurrentQuestion();
+        }
+
+        function clearOption(qId) {
+            if (examFinished) return;
+            delete userAnswers[qId];
+            
+            const box = document.getElementById(`nav_${qId}`);
+            if (box) box.classList.remove("answered");
+            
+            saveSessionState();
+            renderCurrentQuestion();
+        }
+
+        function toggleFlagCurrentQuestion(qId) {
+            if (examFinished) return;
+            const check = document.getElementById("flag_check");
+            const box = document.getElementById(`nav_${qId}`);
+
+            if (check.checked) {
+                flaggedQuestions[qId] = true;
+                if (box) box.classList.add("flagged");
+            } else {
+                delete flaggedQuestions[qId];
+                if (box) box.classList.remove("flagged");
+            }
+            saveSessionState();
+        }
+
+        function loadNavGrid() {
+            const container = document.getElementById("grid-nav-container");
+            container.innerHTML = "";
+
+            allQuestions.forEach((q, index) => {
+                const box = document.createElement("div");
+                box.className = "nav-box";
+                box.id = `nav_${q.id}`;
+                box.innerText = index + 1;
+                box.onclick = () => {
+                    currentQuestionIndex = index;
+                    renderCurrentQuestion();
+                    saveSessionState();
+                };
+                container.appendChild(box);
+            });
+        }
+
+        function highlightCurrentNavBox() {
+            allQuestions.forEach((q, idx) => {
+                const box = document.getElementById(`nav_${q.id}`);
+                if (box) {
+                    if (idx === currentQuestionIndex) {
+                        box.classList.add("current");
+                    } else {
+                        box.classList.remove("current");
+                    }
+                }
+            });
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderCurrentQuestion();
+                saveSessionState();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < allQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderCurrentQuestion();
+                saveSessionState();
+            }
+        }
+
+        function startTimer(duration) {
+            clearInterval(timerInterval);
+            let timerDisplay = document.getElementById("timer");
+
+            timerInterval = setInterval(() => {
+                if (examFinished) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+
+                duration--;
+                timeLeft = duration;
+
+                if (duration % 5 === 0) {
+                    saveSessionState();
+                }
+
+                let hours = Math.floor(duration / 3600);
+                let minutes = Math.floor((duration % 3600) / 60);
+                let seconds = duration % 60;
+
+                hours = hours < 10 ? "0" + hours : hours;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerDisplay.innerText = `${hours}:${minutes}:${seconds}`;
+
+                if (duration <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Vaxtınız başa çatdı! İmtahan avtomatik yekunlaşdırılır.");
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function confirmFinish() {
+            let unanswered = allQuestions.length - Object.keys(userAnswers).length;
+            let msg = "İmtahanı bitirmək istədiyinizdən əminsiniz?";
+            if (unanswered > 0) {
+                msg = `Hələ ${unanswered} sualı cavablandırmamısınız. İmtahanı bitirmək istədiyinizdən əminsiniz?`;
+            }
+
+            if (confirm(msg)) {
+                finishExam();
+            }
+        }
+
+        function finishExam() {
+            examFinished = true;
+            clearInterval(timerInterval);
+            sessionStorage.removeItem("active_exam_session");
+
+            document.getElementById("exam-screen").style.display = "none";
+            document.getElementById("result-screen").style.display = "block";
+
+            document.getElementById("res-name").innerText = currentStudentName;
+
+            let subjects = ["Azərbaycan dili", "Qanunvericilik", "İnformatika", "Məntiq"];
+            let letters = ["A", "B", "C", "D", "E"];
+
+            let totalCorrect = 0;
+            let totalWrong = 0;
+            let totalBlank = 0;
+
+            let reportContainer = document.getElementById("dim-report-content");
+            reportContainer.innerHTML = "";
+
+            subjects.forEach(sub => {
+                let subQuestions = allQuestions.filter(q => q.subject === sub);
+                if (subQuestions.length === 0) return;
+
+                let subCorrect = 0;
+                let subWrong = 0;
+                let subBlank = 0;
+
+                let secDiv = document.createElement("div");
+                secDiv.style.marginBottom = "15px";
+
+                let title = document.createElement("div");
+                title.style.fontWeight = "bold";
+                title.style.marginBottom = "4px";
+                title.innerText = sub;
+                secDiv.appendChild(title);
+
+                let table = document.createElement("table");
+                table.className = "dim-table";
+
+                let trQ = document.createElement("tr");
+                let trA = document.createElement("tr");
+
+                subQuestions.forEach(q => {
+                    let th = document.createElement("th");
+                    th.innerText = q.id;
+                    trQ.appendChild(th);
+
+                    let td = document.createElement("td");
+                    let uAns = userAnswers[q.id];
+
+                    if (uAns === undefined) {
+                        td.innerText = "-";
+                        subBlank++;
+                    } else if (uAns === q.correct) {
+                        td.innerText = letters[uAns];
+                        td.className = "ans-correct";
+                        subCorrect++;
+                    } else {
+                        td.innerText = letters[uAns];
+                        td.className = "ans-wrong";
+                        subWrong++;
+                    }
+                    trA.appendChild(td);
+                });
+
+                table.appendChild(trQ);
+                table.appendChild(trA);
+                secDiv.appendChild(table);
+
+                let subSummary = document.createElement("div");
+                subSummary.style.fontSize = "11px";
+                subSummary.style.color = "#94a3b8";
+                subSummary.innerHTML = `Doğru: ${subCorrect} &nbsp;&nbsp;|&nbsp;&nbsp; Yanlış: ${subWrong} &nbsp;&nbsp;|&nbsp;&nbsp; Cavabsız: ${subBlank}`;
+                secDiv.appendChild(subSummary);
+
+                reportContainer.appendChild(secDiv);
+
+                totalCorrect += subCorrect;
+                totalWrong += subWrong;
+                totalBlank += subBlank;
+            });
+
+            document.getElementById("res-total-correct").innerText = totalCorrect;
+            document.getElementById("res-total-wrong").innerText = totalWrong;
+            document.getElementById("res-total-blank").innerText = totalBlank;
+            document.getElementById("res-total-score").innerText = totalCorrect;
+
+            let groupText = getBBGroup(totalCorrect);
+            document.getElementById("res-bb-group").innerText = groupText;
+
+            saveResultToFirebase({
                 name: currentStudentName,
                 token: currentActiveToken,
-                correct: stats.totalCorrect,
-                wrong: stats.totalWrong,
-                blank: stats.totalBlank,
-                score: stats.score,
-                group: groupText
-            }
-        ]);
-
-    if (error) {
-        console.error("Supabase xətası:", error.message);
-    }
-}
-
-// Admin Paneli Məlumatlarını Supabase-dən Yükləmək
-async function loadAdminResults() {
-    const tableBody = document.getElementById("results-table-body");
-    tableBody.innerHTML = "<tr><td colspan='6'>Məlumatlar yüklənir...</td></tr>";
-
-    const { data, error } = await supabase
-        .from('results')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        tableBody.innerHTML = `<tr><td colspan='6' style='color:red;'>Xəta baş verdi: ${error.message}</td></tr>`;
-        return;
-    }
-
-    tableBody.innerHTML = "";
-    if (!data || data.length === 0) {
-        tableBody.innerHTML = "<tr><td colspan='6'>Hələ heç bir nəticə yoxdur.</td></tr>";
-        document.getElementById("stat-total-students").innerText = "0";
-        document.getElementById("stat-max-score").innerText = "0";
-        document.getElementById("stat-avg-score").innerText = "0";
-        return;
-    }
-
-    let totalStudents = data.length;
-    let maxScore = 0;
-    let sumScore = 0;
-
-    data.forEach(res => {
-        if (res.score > maxScore) maxScore = res.score;
-        sumScore += res.score;
-
-        let row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${res.name}</td>
-            <td>${res.token}</td>
-            <td style="color: green; font-weight: bold;">${res.correct}</td>
-            <td style="color: red; font-weight: bold;">${res.wrong}</td>
-            <td style="font-weight: bold;">${res.score}</td>
-            <td>${res.group}</td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-    document.getElementById("stat-total-students").innerText = totalStudents;
-    document.getElementById("stat-max-score").innerText = maxScore;
-    document.getElementById("stat-avg-score").innerText = (sumScore / totalStudents).toFixed(1);
-}
-
-// Admin Paneli: Nəticələri Təmizləmək
-async function clearResults() {
-    if (confirm("Bütün iştirakçı nəticələrini silməkdən əminsiniz?")) {
-        const { error } = await supabase
-            .from('results')
-            .delete()
-            .neq('id', 0);
-
-        if (error) {
-            alert("Nəticələr silinərkən xəta: " + error.message);
-        } else {
-            alert("Bütün nəticələr təmizləndi.");
-            loadAdminResults();
+                correct: totalCorrect,
+                wrong: totalWrong,
+                blank: totalBlank,
+                score: totalCorrect,
+                group: groupText,
+                timestamp: new Date().toISOString()
+            });
         }
-    }
-}
-</script>
 
+        function getBBGroup(score) {
+            if (score >= 85) return "Nəticə: BB qrupu üzrə Yüksək İxtisas Kateqoriyası (BB1)";
+            if (score >= 75) return "Nəticə: BB qrupu üzrə Orta İxtisas Kateqoriyası (BB2)";
+            if (score >= 65) return "Nəticə: BB qrupu üzrə Standart İxtisas Kateqoriyası (BB3)";
+            if (score >= 55) return "Nəticə: BB qrupu üzrə Kiçik İxtisas Kateqoriyası (BB4)";
+            return "Nəticə: Muvəffəqiyyətsiz (Keçid balı toplanmadı)";
+        }
+
+        function saveResultToFirebase(data) {
+            let newRef = database.ref("results").push();
+            newRef.set(data);
+        }
+
+        function loadAdminResults() {
+            database.ref("results").on("value", (snapshot) => {
+                let data = snapshot.val();
+                let tbody = document.getElementById("results-table-body");
+                tbody.innerHTML = "";
+
+                if (!data) {
+                    document.getElementById("stat-total-students").innerText = "0";
+                    document.getElementById("stat-max-score").innerText = "0";
+                    document.getElementById("stat-avg-score").innerText = "0";
+                    return;
+                }
+
+                let resultsArray = Object.values(data);
+                let totalStudents = resultsArray.length;
+                let maxScore = 0;
+                let sumScore = 0;
+
+                resultsArray.forEach(res => {
+                    if (res.score > maxScore) maxScore = res.score;
+                    sumScore += res.score;
+
+                    let tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td style="padding: 8px; border: 1px solid #334155;">${res.name}</td>
+                        <td style="padding: 8px; border: 1px solid #334155;">${res.token}</td>
+                        <td style="padding: 8px; border: 1px solid #334155; color: #10b981; font-weight: bold;">${res.correct}</td>
+                        <td style="padding: 8px; border: 1px solid #334155; color: #ef4444; font-weight: bold;">${res.wrong}</td>
+                        <td style="padding: 8px; border: 1px solid #334155; font-weight: bold;">${res.score}</td>
+                        <td style="padding: 8px; border: 1px solid #334155;">${res.group}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById("stat-total-students").innerText = totalStudents;
+                document.getElementById("stat-max-score").innerText = maxScore;
+                document.getElementById("stat-avg-score").innerText = (sumScore / totalStudents).toFixed(1);
+            });
+        }
+
+        function clearResults() {
+            if (confirm("Bütün iştirakçı nəticələrini bazadan silmək istədiyinizdən əminsiniz?")) {
+                database.ref("results").remove().then(() => {
+                    alert("Nəticələr uğurla təmizləndi.");
+                });
+            }
+        }
+    </script>
 </body>
 </html>
 
