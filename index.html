@@ -602,7 +602,7 @@
     <script>
         const SUPABASE_URL = 'https://kqjnzgaeydryhdbsnmgb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_sNpqgXWM5SE5c-IdUzuIbw_baBxeYPq';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         document.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'x' || e.key === 'u' || e.key === 's' || e.key === 'a')) {
                 e.preventDefault();
