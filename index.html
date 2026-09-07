@@ -825,10 +825,9 @@
                 }
             });
 
-            const totalScore = totalCorrect; // Dövlət qulluğunda adətən hər doğru cavab 1 baldır
+            const totalScore = totalCorrect;
             let bbGroup = getBBGroup(totalScore);
 
-            // Supabase bazasına nəticəni yazırıq
             try {
                 await supabase.from('results').insert([
                     {
@@ -921,7 +920,6 @@
         }
 
         async function loadAdminData() {
-            // Nəticələrin Yüklənməsi
             const { data: results } = await supabase.from('results').select('*');
             const resTable = document.getElementById('results-table-body');
             resTable.innerHTML = '';
@@ -952,7 +950,6 @@
             document.getElementById('stat-max-score').innerText = maxScore;
             document.getElementById('stat-avg-score').innerText = totalStudents > 0 ? (sumScore / totalStudents).toFixed(1) : 0;
 
-            // Kodların Yüklənməsi
             const { data: tokens } = await supabase.from('exam_tokens').select('*');
             const tokenTable = document.getElementById('tokens-table-body');
             tokenTable.innerHTML = '';
@@ -997,7 +994,7 @@
         }
 
         async function clearResults() {
-            if (confirm("Bütün iştirakçı nəticələrini təmizləmək istədiyinizdən əminsiniz?")) {
+            if (confirm("Bütün iştirakçı nəticələri təmizlənsin?")) {
                 await supabase.from('results').delete().neq('id', 0);
                 await loadAdminData();
             }
